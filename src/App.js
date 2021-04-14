@@ -1,11 +1,39 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from 'react-router-dom'
+import axios from 'axios'
 
 import Login from './Login'
 import Dashboard from './Dashboard'
 import Home from './Home'
 
+import PrivateRoute from './Utils/PrivateRoute'
+import PublicRoute from './Utils/PublicRoute'
+
+import { getToken, removeUserToken, setUserSession } from './Utils/Common'
+
 function App() {
+  
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect( ()=> {
+    const token = getToken()
+    if(!token) {
+      return
+    }
+
+    axios.get(`http://192.168.1.19:4000/verifyToken?token=${token}`).then(response => {
+      setUserSession(response.data.token, response.data.user)
+      setAuthLoading(false)
+    }).catch(error => {
+      removeUserToken()
+      setAuthLoading(false)
+    })
+  }, [])
+
+  if(authLoading && getToken()) {
+    return <div className='content'>Checking Authentcation...</div>
+  }
+
   return (
     <div className="App">
       <BrowserRouter>
@@ -18,8 +46,8 @@ function App() {
           <div className='content'>
           <Switch>
             <Route exact path='/' component={Home} />
-            <Route path='/login' component={Login} />
-            <Route path='/dashboard' component={Dashboard} />
+            <PublicRoute path='/login' component={Login} />
+            <PrivateRoute path='/dashboard' component={Dashboard} />
           </Switch>
           </div> 
         </div>
