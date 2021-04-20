@@ -10,6 +10,7 @@ function Login(props) {
     const [loading, setLoading] = useState(false)
 
     const handleLogin = () => {
+        console.log('Click here!')
         setError(null)
         setLoading(true)
         axios.post('http://192.168.1.19:4000/users/signin', { username: username.value, password: password.value }).then(response => {
